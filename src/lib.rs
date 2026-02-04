@@ -248,4 +248,32 @@ mod tests {
             ],
         );
     }
+
+    // {
+    //     "lemma": "viessu",
+    //     "pos": "N",
+    //     "subclass": "",
+    //     "tags": "Sg+Loc",
+    //     "wordform": "viesus"
+    // }
+    // 
+    // viessobargi: viessu+N+Cmp/SgNom+Cmp#bargi+N+NomAg+Sg+Gen 
+    // 
+    // {
+    //     "lemma": "viessobargi",
+    //     "pos": "N",
+    //     "subclass": "NomAg",
+    //     "tags": "Sg+Loc",
+    //     "wordform": "viessobargis"
+    // }
+    // 
+    // muitaluvvot: muitalit+V+TV+Der/PassL+V+IV+Inf 
+    // 
+    // {
+    //     "lemma": "muitaluvvot",
+    //     "pos": "V",
+    //     "subclass": "",
+    //     "tags": "Ind+Prs+Sg1",
+    //     "wordform": "muitaluvvon"
+    // }
 }
