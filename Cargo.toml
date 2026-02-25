@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-analysis-tags = { path = "../analysis-tags/" }
+analysis-tags = { git = "https://github.com/giellatekno/analysis-tags.git" }
 memchr = "2.7.6"
 serde = "1.0.228"

@@ -9,7 +9,7 @@ pub use analysis_tags::tag::{Tag, OwnedTag};
 /// "N+Sg+Nom"
 #[derive(Debug)]
 pub struct AnalysisParts {
-    /// If the analysis contians a Pos.
+    /// If the analysis contains a Pos.
     pub pos: Option<Pos>,
 
     /// All the individual parts. Contains the Pos as well.
@@ -36,7 +36,7 @@ impl std::fmt::Display for AnalysisParts {
         let mut it = self.parts.iter();
         let first = it.next().expect("anaysis parts is never empty");
         write!(f, "{first}")?;
-        while let Some(item) = it.next() {
+        for item in it {
             write!(f, "+{item}")?;
         }
         Ok(())
@@ -70,8 +70,8 @@ impl serde::Serialize for AnalysisParts {
 }
 
 /// Parse an analysis parts string, with tags separated by `delim`.
-pub fn parse_analysis_parts<'a>(
-    s: &'a str,
+pub fn parse_analysis_parts(
+    s: &str,
     delim: &str,
 ) -> Option<AnalysisParts> {
     if s.is_empty() {
@@ -125,6 +125,14 @@ impl AnalysisParts {
     //        "parts": self.parts,
     //    })
     //}
+}
+
+impl std::str::FromStr for AnalysisParts {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_analysis_parts(s, "+").ok_or(())
+    }
 }
 
 impl AnalysisPart {
