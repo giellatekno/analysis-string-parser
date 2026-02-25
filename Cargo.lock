@@ -14,6 +14,7 @@ dependencies = [
 [[package]]
 name = "analysis-tags"
 version = "0.1.0"
+source = "git+https://github.com/giellatekno/analysis-tags.git#0929a153a6d32c3310371b6a0422f255531dd43b"
 dependencies = [
  "serde",
 ]
