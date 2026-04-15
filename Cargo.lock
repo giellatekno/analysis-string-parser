@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "analysis-string-parser"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "analysis-tags",
  "memchr",
@@ -13,8 +13,8 @@ dependencies = [
 
 [[package]]
 name = "analysis-tags"
-version = "0.1.0"
-source = "git+https://github.com/giellatekno/analysis-tags.git#0929a153a6d32c3310371b6a0422f255531dd43b"
+version = "0.1.1"
+source = "git+https://github.com/giellatekno/analysis-tags.git#ca9691a02a6be11d085823f05a6f1c7cb52df116"
 dependencies = [
  "serde",
 ]
