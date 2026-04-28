@@ -1,8 +1,7 @@
 mod memmem_split;
 
 // re-export items from tags
-pub use analysis_tags::pos::Pos;
-pub use analysis_tags::tag::{OwnedTag, Tag};
+pub use analysis_tags::Tag;
 pub use memmem_split::memmem_split;
 
 /// An Analysis String, `"+"` or `" "`-separated lemmas and tags. Used as input
@@ -13,7 +12,7 @@ pub use memmem_split::memmem_split;
 #[derive(Debug)]
 pub struct AnalysisParts {
     /// If the analysis contains a Pos.
-    pub pos: Option<Pos>,
+    pub pos: Option<Tag>,
 
     /// All the individual parts. Contains the Pos as well.
     pub parts: Vec<AnalysisPart>,
@@ -84,15 +83,16 @@ pub fn parse_analysis_parts(s: &str) -> Option<AnalysisParts> {
 
     for r1 in memmem_split("#", s) {
         for r2 in memmem_split("+", &s[r1.clone()]) {
-            match Tag::from(&s[r1.clone()][r2]) {
-                Tag::Unknown(inner) => {
-                    parts.push(AnalysisPart::Lemma(inner.to_string()));
+            match Tag::try_from(&s[r1.clone()][r2]) {
+                Ok(tag) => {
+                    if tag.is_pos() {
+                        pos = Some(tag);
+                    }
+                    parts.push(AnalysisPart::Tag(tag));
                 }
-                tag @ Tag::Pos(new_pos) => {
-                    parts.push(AnalysisPart::Tag(tag.to_owned()));
-                    pos = Some(new_pos);
+                Err(e) => {
+                    parts.push(AnalysisPart::Lemma(e.to_string()));
                 }
-                tag => parts.push(AnalysisPart::Tag(tag.to_owned())),
             }
         }
 
@@ -111,7 +111,7 @@ pub enum AnalysisPart {
     /// Unknown tag, therefore a Lemma.
     Lemma(String),
     /// A known tag.
-    Tag(OwnedTag),
+    Tag(Tag),
     /// A Word boundry, i.e. the "#" character
     WordBoundry,
 }
@@ -165,7 +165,7 @@ impl AnalysisParts {
             for part in self.parts.iter().take(i + 2) {
                 let _ = match part {
                     AnalysisPart::WordBoundry => write!(out, "#"),
-                    AnalysisPart::Tag(OwnedTag::Cmp) => write!(out, "Cmp"),
+                    AnalysisPart::Tag(Tag::Cmp) => write!(out, "Cmp"),
                     part => write!(out, "{part}+"),
                 };
             }
@@ -202,8 +202,8 @@ impl AnalysisPart {
         }
     }
 
-    /// Return a reference to the `OwnedTag`, if this part is a `Tag`, otherwise `None`.
-    pub fn tag(&self) -> Option<&OwnedTag> {
+    /// Return a reference to the `Tag`, if this part is a `Tag`, otherwise `None`.
+    pub fn tag(&self) -> Option<&Tag> {
         match self {
             Self::Tag(owned_tag) => Some(owned_tag),
             _ => None,
@@ -215,7 +215,7 @@ impl std::fmt::Display for AnalysisPart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Lemma(string) => write!(f, "{string}"),
-            Self::Tag(owned_tag) => write!(f, "{owned_tag}"),
+            Self::Tag(tag) => write!(f, "{}", tag.as_str()),
             Self::WordBoundry => write!(f, "#"),
         }
     }
@@ -269,14 +269,14 @@ mod tests {
     #[test]
     fn only_tags() {
         let parsed = parse_analysis_parts("N+Neu+Pl+Indef").unwrap();
-        assert!(matches!(parsed.pos, Some(Pos::N)));
+        assert!(matches!(parsed.pos, Some(Tag::N)));
         assert_eq!(
             parsed.parts.as_slice(),
             &[
-                AnalysisPart::Tag(OwnedTag::Pos(Pos::N)),
-                AnalysisPart::Tag(OwnedTag::Neu),
-                AnalysisPart::Tag(OwnedTag::Pl),
-                AnalysisPart::Tag(OwnedTag::Indef),
+                AnalysisPart::Tag(Tag::N),
+                AnalysisPart::Tag(Tag::Neu),
+                AnalysisPart::Tag(Tag::Pl),
+                AnalysisPart::Tag(Tag::Indef),
             ],
         );
     }
@@ -284,18 +284,27 @@ mod tests {
     #[test]
     fn compound() {
         let parsed = parse_analysis_parts("skuvla+N+Cmp/SgNom+Cmp#gohppa+N+Sg+Nom").unwrap();
+        let slice = parsed.parts.as_slice();
         assert_eq!(
-            parsed.parts.as_slice(),
+            &slice[..2],
             &[
                 AnalysisPart::Lemma(String::from("skuvla")),
-                AnalysisPart::Tag(OwnedTag::Pos(Pos::N)),
-                AnalysisPart::Tag(OwnedTag::CmpX(String::from("SgNom"))),
-                AnalysisPart::Tag(OwnedTag::Cmp),
+                AnalysisPart::Tag(Tag::N),
+            ]
+        );
+        let AnalysisPart::Tag(tag) = slice[3] else {
+            panic!("3rd element is a tag");
+        };
+        assert_eq!(tag.as_str(), "Cmp/SgNom");
+        assert_eq!(
+            &slice[3..],
+            &[
+                AnalysisPart::Tag(Tag::Cmp),
                 AnalysisPart::WordBoundry,
                 AnalysisPart::Lemma(String::from("gohppa")),
-                AnalysisPart::Tag(OwnedTag::Pos(Pos::N)),
-                AnalysisPart::Tag(OwnedTag::Sg),
-                AnalysisPart::Tag(OwnedTag::Nom),
+                AnalysisPart::Tag(Tag::N),
+                AnalysisPart::Tag(Tag::Sg),
+                AnalysisPart::Tag(Tag::Nom),
             ],
         )
     }

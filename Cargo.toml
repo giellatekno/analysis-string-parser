@@ -4,7 +4,7 @@ version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-analysis-tags = { git = "https://github.com/giellatekno/analysis-tags.git" }
+analysis-tags = { git = "https://github.com/giellatekno/analysis-tags.git", version = "0.2" }
 #analysis-tags = { path = "/home/anders/gut/giellatekno/analysis-tags" }
 memchr = "2.7.6"
 serde = "1.0.228"
