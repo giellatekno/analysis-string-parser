@@ -282,23 +282,24 @@ mod tests {
     }
 
     #[test]
+    fn prefixed_match() {
+        let mut parsed = parse_analysis_parts("Cmp/SgNom").unwrap();
+
+        let AnalysisPart::Tag(tag) = parsed.parts.pop().unwrap() else {
+            panic!("should be a tag");
+        };
+        assert_eq!(tag, Tag::Cmp_SLASH_SgNom);
+    }
+
+    #[test]
     fn compound() {
         let parsed = parse_analysis_parts("skuvla+N+Cmp/SgNom+Cmp#gohppa+N+Sg+Nom").unwrap();
-        let slice = parsed.parts.as_slice();
         assert_eq!(
-            &slice[..2],
+            parsed.parts.as_slice(),
             &[
                 AnalysisPart::Lemma(String::from("skuvla")),
                 AnalysisPart::Tag(Tag::N),
-            ]
-        );
-        let AnalysisPart::Tag(tag) = slice[3] else {
-            panic!("3rd element is a tag");
-        };
-        assert_eq!(tag.as_str(), "Cmp/SgNom");
-        assert_eq!(
-            &slice[3..],
-            &[
+                AnalysisPart::Tag(Tag::Cmp_SLASH_SgNom),
                 AnalysisPart::Tag(Tag::Cmp),
                 AnalysisPart::WordBoundry,
                 AnalysisPart::Lemma(String::from("gohppa")),
