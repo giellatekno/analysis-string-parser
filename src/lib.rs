@@ -267,6 +267,12 @@ mod tests {
     }
 
     #[test]
+    fn finds_poses() {
+        let parsed = parse_analysis_parts("V").unwrap();
+        assert!(matches!(parsed.pos, Some(Tag::V)));
+    }
+
+    #[test]
     fn only_tags() {
         let parsed = parse_analysis_parts("N+Neu+Pl+Indef").unwrap();
         assert!(matches!(parsed.pos, Some(Tag::N)));
